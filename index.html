@@ -156,7 +156,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 
 /* ── 1 Cover ── */
 #cover .cv{position:relative;display:flex;flex-direction:column;gap:26px;margin-top:auto;margin-bottom:auto;max-width:820px}
-#cover .logo{width:520px;height:auto}
+#cover .logo{width:400px;height:auto;align-self:flex-start}
 #cover .k2{font-size:20px;letter-spacing:.3em;color:var(--purple-t);font-weight:500}
 #cover .h-xl{font-size:84px}
 #cover .sub{display:flex;align-items:center;gap:16px;font-size:28px;color:var(--ink-2);font-weight:500}
@@ -586,7 +586,7 @@ body.portrait .agenda{grid-template-rows:none;grid-auto-flow:row}
 body.portrait #cover .callcard{order:2}
 body.portrait .phase-line,body.portrait #cover .radar,body.portrait #summary .radar,body.portrait .marker{display:none}
 body.portrait #cover .callcard{position:relative;left:auto;top:auto;align-self:flex-start}
-body.portrait #cover .logo{width:420px}
+body.portrait #cover .logo{width:340px}
 body.portrait .orbit{width:520px;height:520px}
 body.portrait #aud .radar{width:480px;height:480px;align-self:center}
 body.portrait .art,body.portrait .phone{align-self:center}
@@ -685,7 +685,7 @@ body.portrait .nav .brand img{height:26px}
     <div class="cc-meta">12:14 | 00:28:16 · נתוני המחשה</div>
   </div>
   <div class="cv">
-    <img class="logo r" src="assets/bmby-radar-logo.png" alt="bmby RADAR · מכ״ם מכירות">
+    <img class="logo r" src="assets/bmby-radar-logo-stacked.png" alt="bmby RADAR · מכ״ם מכירות">
     <p class="k2 r">חדש מבית במבי</p>
     <h1 class="h-xl r">תוכנית שיווקית<br><span class="tt">להשקת <span style="white-space:nowrap">BMBY RADAR</span></span></h1>
     <p class="sub r">מכ״ם מכירות<i></i>תוכנית פעולה לעשרת ימי ההשקה</p>
@@ -1322,7 +1322,7 @@ body.portrait .nav .brand img{height:26px}
   const strip=document.getElementById('strip'),vp=document.getElementById('viewport');
   const fill=document.getElementById('fill'),blip=document.getElementById('blip'),track=document.getElementById('track');
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let cur=-1,target=0,portrait=false,pageH=0,scale=1,moving=false,moveT=null;
+  let lockUntil=0,cur=-1,target=0,portrait=false,pageH=0,scale=1,moving=false,moveT=null;
 
   // wrap slides into scaled frames
   const pages=slides.map(s=>{const p=document.createElement('div');p.className='page';const f=document.createElement('div');f.className='frame';s.parentNode.insertBefore(p,s);f.appendChild(s);p.appendChild(f);return p;});
@@ -1421,7 +1421,8 @@ body.portrait .nav .brand img{height:26px}
   }
   function go(i,instant){
     i=Math.max(0,Math.min(N-1,i));
-    if(portrait){target=i;pages[i].scrollIntoView({behavior:instant||reduce?'auto':'smooth',block:'start'});window.scrollBy(0,-70);return;}
+    if(portrait){target=i;lockUntil=performance.now()+900;setActive(i);
+      window.scrollTo({top:Math.max(0,pages[i].getBoundingClientRect().top+scrollY-(document.querySelector('.nav').offsetHeight+10)),behavior:instant||reduce?'auto':'smooth'});return;}
     if(i===target&&!instant&&cur===i)return;
     target=i;setActive(i);
     if(instant||reduce){place(i,false);moving=false;return;}
@@ -1467,7 +1468,7 @@ body.portrait .nav .brand img{height:26px}
   document.getElementById('nav-prev').onclick=()=>go(target-1);
   document.getElementById('fs').onclick=()=>{try{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen().catch(()=>{});}catch(e){}};
   // portrait: track the page in view
-  addEventListener('scroll',()=>{if(!portrait)return;const mid=innerHeight/2;let k=0;
+  addEventListener('scroll',()=>{if(!portrait||performance.now()<lockUntil)return;const mid=innerHeight/2;let k=0;
     pages.forEach((p,j)=>{if(p.getBoundingClientRect().top<=mid)k=j;});target=k;setActive(k);},{passive:true});
   addEventListener('resize',fit);
 
